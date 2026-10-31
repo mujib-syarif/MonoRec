@@ -63,7 +63,13 @@ class RecorderService : Service() {
             type = type or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
         }
         startedAt = SystemClock.elapsedRealtime()
-        ServiceCompat.startForeground(this, NOTIF_ID, buildNotification(), type)
+        try {
+            ServiceCompat.startForeground(this, NOTIF_ID, buildNotification(), type)
+        } catch (e: Exception) {
+            // Mis. SecurityException di Android 14 bila izin mikrofon dicabut.
+            fail("Tidak bisa memulai layanan perekaman. Periksa izin mikrofon dan notifikasi.")
+            return
+        }
 
         val resultCode = intent.getIntExtra(EXTRA_RESULT_CODE, 0)
         val data: Intent? = if (Build.VERSION.SDK_INT >= 33) {

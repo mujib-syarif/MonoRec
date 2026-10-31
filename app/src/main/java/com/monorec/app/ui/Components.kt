@@ -131,13 +131,19 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
 fun RecordButton(recording: Boolean, onClick: () -> Unit) {
     val inner by animateDpAsState(if (recording) 30.dp else 62.dp, label = "inner")
     val corner by animateDpAsState(if (recording) 8.dp else 31.dp, label = "corner")
-    val pulse = rememberInfiniteTransition(label = "pulse")
-    val a by pulse.animateFloat(
-        initialValue = 0.55f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse),
-        label = "pulseAlpha"
-    )
+    // Transisi tak hingga hanya berjalan saat merekam, supaya tidak menguras baterai saat siaga.
+    val a = if (recording) {
+        val pulse = rememberInfiniteTransition(label = "pulse")
+        val value by pulse.animateFloat(
+            initialValue = 0.55f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(tween(1000), RepeatMode.Reverse),
+            label = "pulseAlpha"
+        )
+        value
+    } else {
+        1f
+    }
     Box(
         Modifier
             .size(92.dp)
@@ -149,19 +155,24 @@ fun RecordButton(recording: Boolean, onClick: () -> Unit) {
             Modifier
                 .size(inner)
                 .clip(RoundedCornerShape(corner))
-                .background(Mono.White.copy(alpha = if (recording) a else 1f))
+                .background(Mono.White.copy(alpha = a))
         )
     }
 }
 
 @Composable
 fun StatusPill(recording: Boolean) {
-    val a by rememberInfiniteTransition(label = "dot").animateFloat(
-        initialValue = 0.25f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
-        label = "dotAlpha"
-    )
+    val a = if (recording) {
+        val value by rememberInfiniteTransition(label = "dot").animateFloat(
+            initialValue = 0.25f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(tween(800), RepeatMode.Reverse),
+            label = "dotAlpha"
+        )
+        value
+    } else {
+        0.35f
+    }
     Row(
         Modifier
             .glass(RoundedCornerShape(50), 0.7f)
@@ -172,7 +183,7 @@ fun StatusPill(recording: Boolean) {
             Modifier
                 .size(7.dp)
                 .clip(CircleShape)
-                .background(Mono.White.copy(alpha = if (recording) a else 0.35f))
+                .background(Mono.White.copy(alpha = a))
         )
         Text(
             text = if (recording) "MEREKAM" else "SIAGA",
