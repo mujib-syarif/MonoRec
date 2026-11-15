@@ -160,7 +160,11 @@ private fun App() {
                 .setType("video/mp4")
                 .putExtra(Intent.EXTRA_STREAM, r.uri)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            context.startActivity(Intent.createChooser(send, "Bagikan rekaman"))
+            try {
+                context.startActivity(Intent.createChooser(send, "Bagikan rekaman"))
+            } catch (_: ActivityNotFoundException) {
+                Toast.makeText(context, "Tidak ada aplikasi untuk membagikan rekaman", Toast.LENGTH_SHORT).show()
+            }
         },
         onDelete = { pendingDelete = it }
     )

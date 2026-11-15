@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -239,7 +240,7 @@ fun MainScreen(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SectionLabel("Perangkat")
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatTile("Model", Build.MODEL.take(16), Modifier.weight(1f))
+                    StatTile("Model", Build.MODEL, Modifier.weight(1f))
                     StatTile("Android", Build.VERSION.RELEASE, Modifier.weight(1f))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -322,10 +323,10 @@ private fun RecordingRow(
                 fontSize = 11.sp
             )
         }
-        Box(Modifier.size(38.dp).tap { onShare(r) }, contentAlignment = Alignment.Center) {
+        Box(Modifier.size(48.dp).tap(role = Role.Button) { onShare(r) }, contentAlignment = Alignment.Center) {
             Icon(Icons.Outlined.IosShare, contentDescription = "Bagikan", tint = Mono.Dim, modifier = Modifier.size(20.dp))
         }
-        Box(Modifier.size(38.dp).tap { onDelete(r) }, contentAlignment = Alignment.Center) {
+        Box(Modifier.size(48.dp).tap(role = Role.Button) { onDelete(r) }, contentAlignment = Alignment.Center) {
             Icon(Icons.Outlined.DeleteOutline, contentDescription = "Hapus", tint = Mono.Dim, modifier = Modifier.size(20.dp))
         }
     }

@@ -43,7 +43,10 @@ class RecorderService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> startRecording(intent)
-            ACTION_STOP -> stopRecording()
+            ACTION_STOP -> {
+                // Tidak ada rekaman aktif (mis. proses dimulai ulang): jangan biarkan layanan menggantung.
+                if (engine == null) stopSelf() else stopRecording()
+            }
         }
         return START_NOT_STICKY
     }
@@ -167,6 +170,14 @@ class RecorderService : Service() {
 
     override fun onDestroy() {
         handler.removeCallbacks(ticker)
+        // Bila layanan dihancurkan saat masih merekam, finalisasi file dan lepas sumber daya
+        // (stop() memblokir, jadi jalankan di thread latar).
+        val e = engine
+        if (e != null && !stopping) {
+            engine = null
+            RecorderState.state.value = RecorderState.state.value.copy(recording = false)
+            Thread({ runCatching { e.stop() } }, "monorec-destroy").start()
+        }
         super.onDestroy()
     }
 

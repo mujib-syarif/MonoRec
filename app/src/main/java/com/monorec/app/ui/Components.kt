@@ -15,19 +15,29 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -64,6 +74,7 @@ fun SegmentedControl(
         modifier
             .fillMaxWidth()
             .alpha(if (enabled) 1f else 0.45f)
+            .selectableGroup()
             .glass(RoundedCornerShape(18.dp), 0.8f)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -81,7 +92,9 @@ fun SegmentedControl(
                     .weight(1f)
                     .clip(RoundedCornerShape(14.dp))
                     .background(bg)
-                    .tap(enabled = enabled) { onSelect(i) }
+                    .tap(enabled = enabled, role = Role.RadioButton) { onSelect(i) }
+                    .semantics { this.selected = isSel }
+                    .heightIn(min = 48.dp)
                     .padding(vertical = 11.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -114,14 +127,19 @@ fun StatTile(label: String, value: String, modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Medium,
             letterSpacing = 1.2.sp
         )
+        // Ukuran mengecil bila nilai (mis. Build.MODEL) tidak muat; sisanya dipotong dengan elipsis.
+        var valueSize by remember(value) { mutableStateOf(17f) }
         Text(
             text = value,
             modifier = Modifier.padding(top = 4.dp),
             color = Mono.White,
-            fontSize = 17.sp,
+            fontSize = valueSize.sp,
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Medium,
-            maxLines = 1
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
+            onTextLayout = { if (it.hasVisualOverflow && valueSize > 12f) valueSize -= 1f }
         )
     }
 }
@@ -148,7 +166,10 @@ fun RecordButton(recording: Boolean, onClick: () -> Unit) {
         Modifier
             .size(92.dp)
             .glass(CircleShape, 1.2f)
-            .tap(onClick = onClick),
+            .tap(role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = if (recording) "Berhenti merekam" else "Mulai merekam"
+            },
         contentAlignment = Alignment.Center
     ) {
         Box(

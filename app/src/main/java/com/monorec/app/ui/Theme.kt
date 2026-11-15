@@ -19,13 +19,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 
 object Mono {
     val Black = Color(0xFF000000)
     val White = Color(0xFFFFFFFF)
     val Dim = Color(0x99FFFFFF)      // teks sekunder
-    val Faint = Color(0x59FFFFFF)    // label kecil
+    val Faint = Color(0x80FFFFFF)    // label kecil (kontras >= 4,5:1 di atas hitam)
     val Hairline = Color(0x1AFFFFFF)
 }
 
@@ -108,10 +109,11 @@ fun AuraBackground(content: @Composable BoxScope.() -> Unit) {
 
 /** Klik tanpa ripple, terasa lebih seperti iOS. */
 @Composable
-fun Modifier.tap(enabled: Boolean = true, onClick: () -> Unit): Modifier =
+fun Modifier.tap(enabled: Boolean = true, role: Role? = null, onClick: () -> Unit): Modifier =
     this.clickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = null,
         enabled = enabled,
+        role = role,
         onClick = onClick
     )
